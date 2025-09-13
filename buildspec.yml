@@ -5,23 +5,20 @@ phases:
     runtime-versions:
       python: 3.12
     commands:
-      - echo "Installing AWS CLI v2"
+      - echo "Installing/upgrading AWS CLI"
       - pip install --upgrade awscli
   pre_build:
     commands:
-      - echo "Logging in to AWS..."
-      - aws sts get-caller-identity
+      - echo "Validating root stack..."
+      - aws cloudformation validate-template --template-body file://root-stack.yaml
   build:
     commands:
-      - echo "Packaging CloudFormation templates..."
-      - aws cloudformation package \
-          --template-file vpc-stack.yaml \
-          --s3-bucket my-artifact-bucket \
-          --output-template-file packaged-root.yaml
-  post_build:
-    commands:
-      - echo "Build completed"
-
+      - echo "Deploying root stack (VPC nested stack)..."
+      - aws cloudformation deploy \
+          --stack-name Infra-Prod-InsuranceApp \
+          --template-file root-stack.yaml \
+          --capabilities CAPABILITY_NAMED_IAM
 artifacts:
   files:
-    - packaged-vpc-stack.yaml
+    - root-stack.yaml
+    - vpc-stack.yaml

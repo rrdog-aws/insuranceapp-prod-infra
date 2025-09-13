@@ -1,19 +1,23 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Root stack for VPC, EC2, Lambda, API Gateway, and DynamoDB
+Description: Root stack to deploy VPC as nested stack
+
+Parameters:
+  VPCCidr:
+    Type: String
+    Default: 10.0.0.0/16
 
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: <S3 URL to vpc-stack.yaml>
+      TemplateURL: ./vpc-stack.yaml   
       Parameters:
-        # Example: You could pass CIDR if you want
-        VPCCidr: 10.0.0.0/16
+        VPCCidr: !Ref VPCCidr
 
-  AppStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: <S3 URL to app-stack.yaml>
-      Parameters:
-        VpcId: !GetAtt VPCStack.Outputs.VpcId
-        PublicSubnetId: !GetAtt VPCStack.Outputs.PublicSubnetId
+Outputs:
+  VpcId:
+    Description: "VPC ID from VPC stack"
+    Value: !GetAtt VPCStack.Outputs.VpcId
+  PublicSubnetId:
+    Description: "Public Subnet ID from VPC stack"
+    Value: !GetAtt VPCStack.Outputs.PublicSubnetId
