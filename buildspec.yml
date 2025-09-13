@@ -14,10 +14,8 @@ phases:
   build:
     commands:
       - echo "Deploying root stack (VPC nested stack)..."
-      - aws cloudformation deploy \
-          --stack-name Infra-Prod-InsuranceApp \
-          --template-file root-stack.yaml \
-          --capabilities CAPABILITY_NAMED_IAM
+      - aws cloudformation deploy --stack-name Infra-Prod-InsuranceApp --template-file root-stack.yaml --capabilities CAPABILITY_NAMED_IAM
+
 artifacts:
   files:
     - root-stack.yaml
