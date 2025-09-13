@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - echo "Installing AWS CLI v2"
+      - pip install --upgrade awscli
+  pre_build:
+    commands:
+      - echo "Logging in to AWS..."
+      - aws sts get-caller-identity
+  build:
+    commands:
+      - echo "Packaging CloudFormation templates..."
+      - aws cloudformation package \
+          --template-file vpc-stack.yaml \
+          --s3-bucket my-artifact-bucket \
+          --output-template-file packaged-root.yaml
+  post_build:
+    commands:
+      - echo "Build completed"
+
+artifacts:
+  files:
+    - packaged-vpc-stack.yaml

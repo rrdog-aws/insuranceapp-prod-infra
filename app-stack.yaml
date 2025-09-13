@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Application Stack - Prod
+
+Resources:
+  # Example: EC2
+  Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.micro
+      ImageId: ami-xxxxxxxx
+      SubnetId: !Ref PublicSubnetId
+
+  # DynamoDB
+  ItemsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+
+  # Lambda function placeholder
+  MyFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.12
+      Handler: index.handler
+      Role: arn:aws:iam::123456789012:role/LambdaExecutionRole
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              return {"statusCode": 200, "body": "Hello from Lambda"}
+
+  # API Gateway skeleton
+  MyApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: MyApi
+
+  # ... Resources + Methods for GET and POST
