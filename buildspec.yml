@@ -11,11 +11,9 @@ phases:
     commands:
       - echo "Validating root stack..."
       - aws cloudformation validate-template --template-body file://root-stack.yaml
-  build:
-    commands:
-      - echo "Deploying root stack (VPC nested stack)..."
-      
+  
 artifacts:
   files:
     - root-stack.yaml
     - vpc-stack.yaml
+
