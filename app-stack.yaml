@@ -82,7 +82,7 @@ Resources:
         /opt/aws/bin/cfn-signal -e $? --stack !Ref 'AWS::StackName' --resource Instance --region !Ref 'AWS::Region'
     CreationPolicy:
       ResourceSignal:
-        Timeout: PT5M
+        Timeout: PT10M
 
 Outputs:
   EC2Id:
