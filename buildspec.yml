@@ -11,7 +11,11 @@ phases:
     commands:
       - echo "Validating root stack..."
       - aws cloudformation validate-template --template-body file://root-stack.yaml
-  
+  build:
+    commands:
+      - echo "Packaging CloudFormation templates..."
+      - aws cloudformation package --template-file root-stack.yaml --s3-bucket $ARTIFACT_BUCKET --output-template-file packaged-root-stack.yaml
+
 artifacts:
   files:
     - root-stack.yaml
