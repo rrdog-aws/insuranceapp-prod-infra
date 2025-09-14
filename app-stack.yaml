@@ -1,9 +1,17 @@
 Resources:
+  Parameters:
+    VPCId:
+    Type: String
+    Description: The VPC id
+    PublicSubnetId:
+    Type: String
+    Description: The public subnet id
+
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow HTTP
-      VpcId: !ImportValue InsuranceAppProd-VPCId
+      VpcId: !Ref VPCId
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -61,7 +69,7 @@ Resources:
     Properties:
       InstanceType: t3.small
       ImageId: !Sub 'resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
-      SubnetId: !ImportValue InsuranceAppProd-PublicSubnetId
+      SubnetId: !Ref PublicSubnetId
       SecurityGroupIds:
       - !Ref WebServerSecurityGroup
       UserData: !Base64 |
