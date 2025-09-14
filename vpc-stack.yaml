@@ -99,11 +99,10 @@ Outputs:
     Description: "VPC ID for Insurance App Prod"
     Value: !Ref VPC
     Export:
-      Name: InsuranceAppProd-VPCId
+      Name: InsuranceAppProd-VPCId  
 
   PublicSubnetId:
     Description: "Public Subnet ID for Insurance App Prod"
     Value: !Ref PublicSubnet
     Export:
       Name: InsuranceAppProd-PublicSubnetId
- 
