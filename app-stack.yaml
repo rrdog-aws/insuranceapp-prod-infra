@@ -1,11 +1,13 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: App Stack for Insurance app Prod
+
 Parameters:
-  VpcId:
+    VPCId:
     Type: String
     Description: The VPC id
-  PublicSubnetId:
+    PublicSubnetId:
     Type: String
     Description: The public subnet id
-    
 Resources:
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -69,7 +71,7 @@ Resources:
     Properties:
       InstanceType: t3.small
       ImageId: !Sub 'resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
-      SubnetId: !Ref PublicSubnetId
+      SubnetId: !Ref PublicSubnetIdgit
       SecurityGroupIds:
       - !Ref WebServerSecurityGroup
       UserData: !Base64 |
