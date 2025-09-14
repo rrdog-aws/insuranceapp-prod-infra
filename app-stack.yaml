@@ -1,12 +1,12 @@
-Resources:
-  Parameters:
-    VPCId:
+Parameters:
+  VpcId:
     Type: String
     Description: The VPC id
-    PublicSubnetId:
+  PublicSubnetId:
     Type: String
     Description: The public subnet id
-
+    
+Resources:
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
