@@ -1,18 +1,11 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Root stack to deploy VPC as nested stack
 
-Parameters:
-  VPCCidr:
-    Type: String
-    Default: 10.0.0.0/16
-
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: ./vpc-stack.yaml   
-      Parameters:
-        VPCCidr: !Ref VPCCidr
 
 Outputs:
   VpcId:
