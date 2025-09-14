@@ -11,8 +11,7 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: ./app-stack.yaml
-      Parameters:
-        VpcId: !GetAtt VPCStack.Outputs.VpcId
+
 
 Outputs:
   VpcId:
