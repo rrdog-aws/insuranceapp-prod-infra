@@ -20,7 +20,20 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
+  
+  # Elastic IP
+  WebServerEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
 
+  # Associate the EIP with the EC2 instance
+  WebServerEIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref Instance
+      EIP: !Ref WebServerEIP
+  
   Instance:
     Type: AWS::EC2::Instance
     Metadata:
@@ -80,9 +93,6 @@ Resources:
         yum install -y aws-cfn-bootstrap
         /opt/aws/bin/cfn-init -v --stack !Ref 'AWS::StackName' --resource Instance --region !Ref 'AWS::Region'
         /opt/aws/bin/cfn-signal -e $? --stack !Ref 'AWS::StackName' --resource Instance --region !Ref 'AWS::Region'
-    CreationPolicy:
-      ResourceSignal:
-        Timeout: PT10M
 
 Outputs:
   EC2Id:
