@@ -96,8 +96,14 @@ Resources:
 
 Outputs:
   VpcId:
+    Description: "VPC ID for Insurance App Prod"
     Value: !Ref VPC
+    Export:
+      Name: InsuranceAppProd-VPCId
+
   PublicSubnetId:
+    Description: "Public Subnet ID for Insurance App Prod"
     Value: !Ref PublicSubnet
     Export:
-      Name: PublicSubnet 
+      Name: InsuranceAppProd-PublicSubnetId
+ 

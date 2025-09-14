@@ -1,4 +1,15 @@
 Resources:
+  WebServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP
+      VpcId: !ImportValue InsuranceAppProd-VPCId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
   Instance:
     Type: AWS::EC2::Instance
     Metadata:
@@ -50,7 +61,9 @@ Resources:
     Properties:
       InstanceType: t3.small
       ImageId: !Sub 'resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
-      SubnetId: !ImportValue PublicSubnet
+      SubnetId: !ImportValue InsuranceAppProd-PublicSubnetId
+      SecurityGroupIds:
+      - !Ref WebServerSecurityGroup
       UserData: !Base64 |
         #!/bin/bash -xe
         yum install -y aws-cfn-bootstrap
