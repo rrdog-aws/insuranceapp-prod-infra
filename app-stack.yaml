@@ -50,7 +50,7 @@ Resources:
     Properties:
       InstanceType: t3.small
       ImageId: !Sub 'resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
-      SubnetId: !Ref PublicSubnetId
+      SubnetId: !ImportValue PublicSubnet
       UserData: !Base64 |
         #!/bin/bash -xe
         yum install -y aws-cfn-bootstrap
