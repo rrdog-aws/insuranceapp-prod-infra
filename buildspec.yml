@@ -14,7 +14,6 @@ phases:
   build:
     commands:
       - echo "Packaging CloudFormation templates..."
-      - echo $ARTIFACT_BUCKET
       - aws cloudformation package --template-file root-stack.yaml --s3-bucket codepipeline-eu-north-1-322643336408 --output-template-file packaged-root-stack.yaml
 
 artifacts:
