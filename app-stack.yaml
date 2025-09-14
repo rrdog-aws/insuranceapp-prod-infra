@@ -1,19 +1,20 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: App Stack for Insurance app Prod
+Description: EC2 App Stack
 
 Parameters:
-    VPCId:
+  VpcId:
     Type: String
     Description: The VPC id
-    PublicSubnetId:
+  PublicSubnetId:
     Type: String
     Description: The public subnet id
+
 Resources:
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow HTTP
-      VpcId: !Ref VPCId
+      VpcId: !Ref VpcId
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 80
@@ -71,9 +72,9 @@ Resources:
     Properties:
       InstanceType: t3.small
       ImageId: !Sub 'resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
-      SubnetId: !Ref PublicSubnetIdgit
+      SubnetId: !Ref PublicSubnetId
       SecurityGroupIds:
-      - !Ref WebServerSecurityGroup
+        - !Ref WebServerSecurityGroup
       UserData: !Base64 |
         #!/bin/bash -xe
         yum install -y aws-cfn-bootstrap
@@ -82,3 +83,8 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Timeout: PT5M
+
+Outputs:
+  EC2Id:
+    Description: "EC2 instance ID"
+    Value: !Ref Instance
