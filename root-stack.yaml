@@ -7,6 +7,13 @@ Resources:
     Properties:
       TemplateURL: ./vpc-stack.yaml   
 
+  Appstack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./app-stack.yaml
+      Parameters:
+        VpcId: !GetAtt VPCStack.Outputs.VpcId
+
 Outputs:
   VpcId:
     Description: "VPC ID from VPC stack"
@@ -14,3 +21,6 @@ Outputs:
   PublicSubnetId:
     Description: "Public Subnet ID from VPC stack"
     Value: !GetAtt VPCStack.Outputs.PublicSubnetId
+  EC2Id:
+    Description: "EC2 instance ID from app stack"
+    Value: !GetAtt Appstack.Outputs.EC2Id

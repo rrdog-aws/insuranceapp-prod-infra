@@ -1,43 +1,61 @@
-AWSTemplateFormatVersion: "2010-09-09"
-Description: Application Stack - Prod
-
 Resources:
-  # Example: EC2
   Instance:
     Type: AWS::EC2::Instance
+    Metadata:
+      'AWS::CloudFormation::Init':
+        config:
+          packages:
+            yum:
+              nginx: []
+              php: []
+              php-fpm: []
+          files:
+            /var/www/html/index.php:
+              content: |
+                <?php
+                echo "Hello world!";
+              mode: '0644'
+              owner: nginx
+              group: nginx
+            /etc/nginx/conf.d/default.conf:
+              content: |
+                server {
+                    listen 80 default_server;
+                    server_name _;
+                    root /var/www/html;
+                    index index.php index.html;
+                    
+                    location / {
+                        try_files $uri $uri/ =404;
+                    }
+
+                    location ~ \.php$ {
+                        include fastcgi_params;
+                        fastcgi_pass 127.0.0.1:9000;
+                        fastcgi_index index.php;
+                        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                    }
+                }
+              mode: '0644'
+              owner: root
+              group: root
+          services:
+            sysvinit:
+              nginx:
+                enabled: true
+                ensureRunning: true
+              php-fpm:
+                enabled: true
+                ensureRunning: true
     Properties:
-      InstanceType: t3.micro
-      ImageId: ami-xxxxxxxx
+      InstanceType: t3.small
+      ImageId: !Sub 'resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
       SubnetId: !Ref PublicSubnetId
-
-  # DynamoDB
-  ItemsTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-      KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-      BillingMode: PAY_PER_REQUEST
-
-  # Lambda function placeholder
-  MyFunction:
-    Type: AWS::Lambda::Function
-    Properties:
-      Runtime: python3.12
-      Handler: index.handler
-      Role: arn:aws:iam::123456789012:role/LambdaExecutionRole
-      Code:
-        ZipFile: |
-          def handler(event, context):
-              return {"statusCode": 200, "body": "Hello from Lambda"}
-
-  # API Gateway skeleton
-  MyApi:
-    Type: AWS::ApiGateway::RestApi
-    Properties:
-      Name: MyApi
-
-  # ... Resources + Methods for GET and POST
+      UserData: !Base64 |
+        #!/bin/bash -xe
+        yum install -y aws-cfn-bootstrap
+        /opt/aws/bin/cfn-init -v --stack !Ref 'AWS::StackName' --resource Instance --region !Ref 'AWS::Region'
+        /opt/aws/bin/cfn-signal -e $? --stack !Ref 'AWS::StackName' --resource Instance --region !Ref 'AWS::Region'
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT5M
