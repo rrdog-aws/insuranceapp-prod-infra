@@ -110,6 +110,7 @@ Resources:
               mode: '0644'
               owner: root
               group: root
+            /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json:
               content: |
                 {
                   "agent": {
