@@ -75,14 +75,16 @@ Resources:
                 yum install -y nginx php php-fpm amazon-ssm-agent amazon-cloudwatch-agent 
             enable_nginx:
               command: amazon-linux-extras enable nginx -y 
+            chown_www:
+              command: chown -R nginx:nginx /usr/share/nginx/html
           files:
             /var/www/html/index.php:
               content: |
                 <?php
                 echo "Hello world! from EC2 with SSM and CW Agent";
               mode: '0644'
-              owner: nginx
-              group: nginx
+              owner: root
+              group: root
             /etc/nginx/conf.d/default.conf:
               content: |
                 server {
