@@ -10,6 +10,31 @@ Parameters:
     Description: The public subnet id
 
 Resources:
+  EC2Role:
+    Type: AWS::IAM::Role 
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforAWSCloudFormation
+        # SSM agent (Session Manager, Run Command, etc.)
+      - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        # CloudWatch agent (logs & metrics)
+      - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+   
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2Role
+    
   WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -20,6 +45,10 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourcePrefixListId: pl-0bd77a95ba8e317a6
   
   # Elastic IP
   WebServerEIP:
@@ -44,11 +73,13 @@ Resources:
               nginx: []
               php: []
               php-fpm: []
+              amazon-ssm-agent: []
+              amazon-cloudwatch-agent: []
           files:
             /var/www/html/index.php:
               content: |
                 <?php
-                echo "Hello world!";
+                echo "Hello world! from EC2 with SSM and CW Agent";
               mode: '0644'
               owner: nginx
               group: nginx
@@ -74,12 +105,42 @@ Resources:
               mode: '0644'
               owner: root
               group: root
+              content: |
+                {
+                  "agent": {
+                    "metrics_collection_interval": 60,
+                    "run_as_user": "root"
+                  },
+                  "metrics": {
+                    "namespace": "EC2/App",
+                    "metrics_collected": {
+                      "cpu": {
+                        "measurement": ["cpu_usage_idle","cpu_usage_system","cpu_usage_user"],
+                        "metrics_collection_interval": 60,
+                        "resources": ["*"]
+                      },
+                      "mem": {
+                        "measurement": ["mem_used_percent"],
+                        "metrics_collection_interval": 60
+                      }
+                    }
+                  }
+                }
+              mode: '0644'
+              owner: root
+              group: root
           services:
             sysvinit:
               nginx:
                 enabled: true
                 ensureRunning: true
               php-fpm:
+                enabled: true
+                ensureRunning: true
+              amazon-ssm-agent:
+                enabled: true
+                ensureRunning: true
+              amazon-cloudwatch-agent:
                 enabled: true
                 ensureRunning: true
     Properties:
