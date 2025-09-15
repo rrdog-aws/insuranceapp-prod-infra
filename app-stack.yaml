@@ -70,7 +70,6 @@ Resources:
       'AWS::CloudFormation::Init':
         config:
           commands:
-            nginx:
             00_create_nginx_user:
               command: useradd -r -s /sbin/nologin nginx || true
             01_install_nginx:
