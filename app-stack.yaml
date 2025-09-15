@@ -22,8 +22,6 @@ Resources:
               Service:
                 - ec2.amazonaws.com
                 - cloudformation.amazonaws.com
-                - s3.amazonaws.com
-                - lambda.amazonaws.com
             Action:
               - 'sts:AssumeRole'
       ManagedPolicyArns:
@@ -31,6 +29,17 @@ Resources:
       - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       # CloudWatch agent
       - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      Policies:
+      # S3 bucket read
+      - PolicyName: S3BucketRead
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+              Resource:
+                - arn:aws:s3:::VPCInsuranceAppProdInfra-S3Stack-1XVI39RE1LU9A/*
 
   EC2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -156,6 +165,7 @@ Resources:
       InstanceType: t3.small
       ImageId: !Sub 'resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
       SubnetId: !Ref PublicSubnetId
+      IamInstanceProfile: !Ref EC2InstanceProfile
       SecurityGroupIds:
         - !Ref WebServerSecurityGroup
       UserData: !Base64 |
