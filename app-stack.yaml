@@ -77,7 +77,7 @@ Resources:
             02_enable_nginx:
               command: yum install -y php php-fpm amazon-ssm-agent amazon-cloudwatch-agent 
             enable_nginx:
-              command: amazon-linux-extras enable nginx -y 
+              command: amazon-linux-extras enable nginx1 -y 
             chown_www:
               command: chown -R nginx:nginx /usr/share/nginx/html
           files:
