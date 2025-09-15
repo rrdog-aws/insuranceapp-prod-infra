@@ -94,7 +94,7 @@ Resources:
             04_chown_www:
               command: chown -R nginx:nginx /usr/share/nginx/html
             05_get_php_config:
-              command: aws s3 cp s3://VPCInsuranceAppProdInfra-S3Stack-1XVI39RE1LU9A/index.php /var/www/html/index.php
+              command: aws s3 cp s3://vpcinsuranceappprodinfra-s3stack-1xvi39re-s3bucket-lkingaovz59t/index.php /var/www/html/index.php
             06_fixpermissions:
               command: chown root:root /var/www/html/index.php && chmod 0644 /var/www/html/index.php
 
