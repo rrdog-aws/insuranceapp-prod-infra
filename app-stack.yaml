@@ -29,6 +29,8 @@ Resources:
       - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       # CloudWatch agent
       - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      # S3 read
+      - arn:aws:iam::aws:policy/AmazonS3FullAccess
       Policies:
       # S3 bucket read
       - PolicyName: S3BucketRead
