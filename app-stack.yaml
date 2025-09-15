@@ -99,7 +99,7 @@ Resources:
               command: chown root:root /var/www/html/index.php && chmod 0644 /var/www/html/index.php
 
         files:
-          /etc/nginx/nginx.conf:
+          /etc/nginx/conf.d/default.conf:
             content: |
               server {
                   listen 80 default_server;
@@ -113,7 +113,7 @@ Resources:
 
                   location ~ \.php$ {
                       include fastcgi_params;
-                      fastcgi_pass 127.0.0.1:9000;
+                      fastcgi_pass unix:/run/php-fpm/www.sock;
                       fastcgi_index index.php;
                       fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
                   }
