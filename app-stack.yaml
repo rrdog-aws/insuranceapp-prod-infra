@@ -30,7 +30,6 @@ Resources:
       # CloudWatch agent
       - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
 
-   
   EC2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
@@ -70,13 +69,12 @@ Resources:
     Metadata:
       'AWS::CloudFormation::Init':
         config:
-          packages:
-            yum:
-              nginx: []
-              php: []
-              php-fpm: []
-              amazon-ssm-agent: []
-              amazon-cloudwatch-agent: []
+          commands:
+            nginx:
+              command: |
+                yum install -y nginx php php-fpm amazon-ssm-agent amazon-cloudwatch-agent 
+            enable_nginx:
+              command: amazon-linux-extras enable nginx -y 
           files:
             /var/www/html/index.php:
               content: |
