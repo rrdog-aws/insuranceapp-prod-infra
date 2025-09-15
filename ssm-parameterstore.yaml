@@ -1,0 +1,572 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Stack to deploy SSM parameter store configuration
+
+Parameters:
+  Environment:
+    Type: String
+    Default: Prod
+    Description: Deployment php configuration
+
+Resources:
+  SsmParameters:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/InsuranceApp/${Environment}/PHPConfig/main"
+      Type: String
+      Value: |
+        <?php
+        // =========================
+        // index.php (Clean, no OpenTelemetry)
+        // =========================
+
+        // Error reporting for debugging
+        error_reporting(E_ALL);
+        ini_set('display_errors', 1);
+
+        $message = '';
+        $quoteNumber = '';
+        $quotePrice = '';
+
+        // =========================
+        // Helper function: send confirmation email
+        // =========================
+        function sendConfirmationEmail($policyData) {
+        try {
+            $to = $policyData['email'];
+            $subject = "Your Insurance Policy Confirmation";
+            $message = "Thank you for purchasing your insurance policy.\n\n";
+            $message .= "Policy ID: " . $policyData['policyId'] . "\n";
+            $message .= "Name: " . $policyData['name'] . "\n";
+            $message .= "Vehicle: " . $policyData['car_year'] . " " . $policyData['car_maker'] . " " . $policyData['car_model'] . "\n";
+            $message .= "Coverage Start Date: " . $policyData['cover_start'] . "\n";
+
+            mail($to, $subject, $message);
+          } catch (Exception $e) {
+            error_log("Email sending failed: " . $e->getMessage());
+          }
+        }
+
+        // =========================
+        // Helper function: create policy via API
+        // =========================
+        function createPolicy($policyData) {
+            $apiEndpoint = 'https://ht3n60c6d3.execute-api.eu-north-1.amazonaws.com/putpolicy';
+
+            try {
+                $client = new \GuzzleHttp\Client();
+                $response = $client->post($apiEndpoint, ['json' => $policyData]);
+                $result = json_decode($response->getBody(), true);
+
+                if ($result && isset($result['policyId'])) {
+                    return array_merge($policyData, $result);
+                } else {
+                    return null;
+                }
+            } catch (Exception $e) {
+                error_log("Policy creation failed: " . $e->getMessage());
+                return null;
+            }
+        }
+
+        // =========================
+        // Handle POST: purchase submission
+        // =========================
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['purchase'])) {
+            try {
+                $policyData = [
+                    'quoteId' => $_POST['quoteId'] ?? '',
+                    'name' => $_POST['name'] ?? '',
+                    'email' => $_POST['email'] ?? '',
+                    'car_plate' => $_POST['car_plate'] ?? '',
+                    'car_maker' => $_POST['car_maker'] ?? '',
+                    'car_model' => $_POST['car_model'] ?? '',
+                    'car_year' => $_POST['car_year'] ?? '',
+                    'cover_start' => $_POST['cover_start'] ?? '',
+                    'quotePrice' => $_POST['quotePrice'] ?? ''
+                ];
+
+                $result = createPolicy($policyData);
+
+                if ($result) {
+                    sendConfirmationEmail($result);
+                    include 'policy_success.php';
+                    exit;
+                } else {
+                    $message = "Policy creation failed.";
+                }
+            } catch (Exception $e) {
+                $message = "Error: " . $e->getMessage();
+                error_log($message);
+            }
+        }
+
+        // =========================
+        // Handle POST: quote submission
+        // =========================
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['purchase'])) {
+            try {
+                $postData = [
+                    'name' => $_POST['name'] ?? '',
+                    'email' => $_POST['email'] ?? '',
+                    'dob' => $_POST['dob'] ?? '',
+                    'license_number' => $_POST['license_number'] ?? '',
+                    'license_years' => $_POST['license_years'] ?? '',
+                    'claims' => $_POST['claims'] ?? '',
+                    'employment_status' => $_POST['employment_status'] ?? '',
+                    'address' => $_POST['address'] ?? '',
+                    'eircode' => $_POST['eircode'] ?? '',
+                    'car_plate' => $_POST['car_plate'] ?? '',
+                    'car_maker' => $_POST['car_maker'] ?? '',
+                    'car_model' => $_POST['car_model'] ?? '',
+                    'car_year' => $_POST['car_year'] ?? '',
+                    'cover_start' => $_POST['cover_start'] ?? ''
+                ];
+
+                $apiEndpoint = 'https://ht3n60c6d3.execute-api.eu-north-1.amazonaws.com/CreateQuote';
+                $client = new \GuzzleHttp\Client();
+                $response = $client->post($apiEndpoint, ['json' => $postData]);
+                $result = json_decode($response->getBody(), true);
+
+                $quoteNumber = $result['quoteNumber'] ?? '';
+                $quotePrice = $result['estimatedPrice'] ?? '';
+
+                $message = "<div class='quote-success'>
+                                <strong>Quote Generated Successfully!</strong><br>
+                                <div class='quote-info'>
+                                    <span class='quote-label'>Quote Number:</span> 
+                                    <span class='quote-value'>{$quoteNumber}</span>
+                                </div>
+                                <div class='price-highlight'>
+                                    Estimated Price: {$quotePrice}
+                                </div>
+                                <div class='purchase-section mt-3'>
+                                    <button type='button' class='btn btn-success btn-lg purchase-btn' onclick='showPurchaseForm()'>
+                                        <i class='fas fa-shopping-cart'></i> Purchase Now
+                                    </button>
+                                </div>
+                            </div>";
+
+            } catch (Exception $e) {
+                $message = "Error: An unexpected error occurred. Please try again later.";
+                error_log($e->getMessage());
+            }
+        }
+
+        // =========================
+        // Your existing HTML output
+        // =========================
+        ?>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Car Insurance</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+            <style>
+                body {
+                    background-color: #e6e6fa;
+                    color: #4b0082;
+                    min-height: 100vh;
+                }
+                .quote-form {
+                    background-color: #f5f0ff;
+                    padding: 2rem;
+                    border-radius: 25px;
+                    box-shadow: 0 0 20px rgba(75, 0, 130, 0.15);
+                    margin-top: 2rem;
+                    margin-bottom: 2rem;
+                }
+                .header {
+                    background-color: #e6e6fa;
+                    color: #4b0082;
+                    padding: 2rem 0;
+                    margin-bottom: 2rem;
+                    border-radius: 25px;
+                    box-shadow: 0 0 20px rgba(75, 0, 130, 0.15);
+                }
+                .header h1 {
+                    font-weight: bold;
+                }
+                .footer {
+                    text-align: center;
+                    padding: 20px;
+                    color: #4b0082;
+                    font-style: italic;
+                    margin-bottom: 2rem;
+                }
+                .form-control {
+                    border-radius: 15px;
+                    border: 1px solid #6a5acd;
+                    background-color: white;
+                    transition: all 0.3s ease;
+                }
+                .form-control:focus {
+                    border-color: #4b0082;
+                    box-shadow: 0 0 0 0.2rem rgba(75, 0, 130, 0.25);
+                }
+                .form-control:hover {
+                    border-color: #4b0082;
+                }
+                .btn-primary {
+                    background-color: #6a5acd;
+                    border-color: #6a5acd;
+                    border-radius: 15px;
+                    padding: 10px 30px;
+                    transition: all 0.3s ease;
+                }
+                .btn-primary:hover {
+                    background-color: #4b0082;
+                    border-color: #4b0082;
+                }
+                .form-label {
+                    color: #4b0082;
+                    font-weight: 500;
+                }
+                h3 {
+                    color: #4b0082;
+                    margin-bottom: 1.5rem;
+                }
+                .alert {
+                    border-radius: 15px;
+                    text-align: center;
+                    background-color: #f5f0ff;
+                    border-color: #6a5acd;
+                    color: #4b0082;
+                }
+                .quote-result {
+                    font-size: 1.2em;
+                    margin-bottom: 2rem;
+                    padding: 1.5rem;
+                }
+                .alert-success {
+                    background-color: #e8f0ff;
+                    box-shadow: 0 0 15px rgba(75, 0, 130, 0.1);
+                }
+                .quote-success {
+                    text-align: center;
+                    padding: 2rem;
+                    background-color: #f8f9fa;
+                    border-radius: 15px;
+                    box-shadow: 0 0 20px rgba(75, 0, 130, 0.15);
+                    margin-bottom: 2rem;
+                }
+                .purchase-section {
+                    margin-top: 2rem;
+                    padding-top: 1rem;
+                    border-top: 1px solid #dee2e6;
+                }
+                .purchase-btn {
+                    background-color: #28a745;
+                    border-color: #28a745;
+                    padding: 1rem 2rem;
+                    font-size: 1.2rem;
+                    border-radius: 25px;
+                    transition: all 0.3s ease;
+                }
+                .purchase-btn:hover {
+                    background-color: #218838;
+                    border-color: #1e7e34;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+                }
+                .quote-info {
+                    font-size: 1.2rem;
+                    margin-bottom: 1rem;
+                }
+                .quote-label {
+                    font-weight: bold;
+                    color: #4b0082;
+                }
+                .quote-value {
+                    color: #6a5acd;
+                }
+                .price-highlight {
+                    font-size: 1.5rem;
+                    color: #28a745;
+                    font-weight: bold;
+                    margin: 1rem 0;
+                }
+                .modal {
+                    display: none;
+                    position: fixed;
+                    z-index: 1000;
+                    left: 0;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0,0,0,0.5);
+                }
+                .modal-content {
+                    background-color: #fefefe;
+                    margin: 15% auto;
+                    padding: 20px;
+                    border: 1px solid #888;
+                    width: 80%;
+                    max-width: 500px;
+                    border-radius: 15px;
+                }
+                .close {
+                    color: #aaa;
+                    float: right;
+                    font-size: 28px;
+                    font-weight: bold;
+                    cursor: pointer;
+                }
+                .close:hover,
+                .close:focus {
+                    color: black;
+                    text-decoration: none;
+                    cursor: pointer;
+                }
+                .auth-buttons {
+                    margin-bottom: 1rem;
+                }
+                .login-btn {
+                    padding: 0.5rem 2rem;
+                    font-size: 1.1rem;
+                    background-color: #4b0082;
+                    border-color: #4b0082;
+                    transition: all 0.3s ease;
+                }
+                .login-btn:hover {
+                    background-color: #6a5acd;
+                    border-color: #6a5acd;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 15px rgba(75, 0, 130, 0.3);
+                }
+                .login-btn i {
+                    margin-right: 8px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <div class="container text-center">
+                    <h1>Car Insurance</h1>
+                    <div class="auth-buttons mt-3">
+                        <a href="https://eu-north-183zgsb0xm.auth.eu-north-1.amazoncognito.com/login?client_id=4h8u65ctqp5l0dabrsror66ukt&response_type=code&scope=email+openid+phone&redirect_uri=https%3A%2F%2Fapp.insurance.rrdog.people.aws.dev%2Fhello-world.php" class="btn btn-primary login-btn">
+                            <i class="fas fa-sign-in-alt"></i> Login/Register
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                <?php if ($message): ?>
+                    <div class="alert alert-success quote-result">
+                        <?php echo $message; ?>
+                    </div>
+                <?php endif; ?>
+
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        <div class="quote-form">
+                            <form method="POST" action="">
+                                <!-- Personal Information -->
+                                <h3>Personal Information</h3>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label for="name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="name" name="name" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="dob" class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control" id="dob" name="dob" required>
+                                    </div>
+                                </div>
+
+                                <!-- License Information -->
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label for="license_number" class="form-label">License Number</label>
+                                        <input type="text" class="form-control" id="license_number" name="license_number" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="license_years" class="form-label">Years of License</label>
+                                        <input type="number" class="form-control" id="license_years" name="license_years" min="0" max="70" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="claims" class="form-label">Number of Claims</label>
+                                        <input type="number" class="form-control" id="claims" name="claims" min="0" required>
+                                    </div>
+                                </div>
+
+                                <!-- Employment Status -->
+                                <div class="mb-3">
+                                    <label for="employment_status" class="form-label">Employment Status</label>
+                                    <select class="form-control" id="employment_status" name="employment_status" required>
+                                        <option value="">Select Status</option>
+                                        <option value="employed">Employed</option>
+                                        <option value="self-employed">Self-Employed</option>
+                                        <option value="unemployed">Unemployed</option>
+                                    </select>
+                                </div>
+
+                                <!-- Address -->
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <label for="address" class="form-label">Address</label>
+                                        <input type="text" class="form-control" id="address" name="address" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="eircode" class="form-label">Eircode</label>
+                                        <input type="text" class="form-control" id="eircode" name="eircode" required>
+                                    </div>
+                                </div>
+
+                                <!-- Vehicle Information -->
+                                <h3 class="mt-4">Vehicle Information</h3>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="car_plate" class="form-label">Car License Plate</label>
+                                        <input type="text" class="form-control" id="car_plate" name="car_plate" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="car_maker" class="form-label">Car Manufacturer</label>
+                                        <input type="text" class="form-control" id="car_maker" name="car_maker" required>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="car_model" class="form-label">Car Model</label>
+                                        <input type="text" class="form-control" id="car_model" name="car_model" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="car_year" class="form-label">Car Year</label>
+                                        <input type="number" class="form-control" id="car_year" name="car_year" min="1900" max="2024" required>
+                                    </div>
+                                </div>
+
+                                <!-- Insurance Start Date -->
+                                <div class="mb-4">
+                                    <label for="cover_start" class="form-label">When do you want the cover to start?</label>
+                                    <input type="date" class="form-control" id="cover_start" name="cover_start" required>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Request Quote</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <p>Developed by Renato Gentil</p>
+                </div>
+            </div>
+
+            <!-- Purchase Modal -->
+            <div id="purchaseModal" class="modal">
+                <div class="modal-content">
+                    <span class="close" onclick="closeModal()">&times;</span>
+                    <h2>Complete Your Purchase</h2>
+                    <form id="purchaseForm" method="POST" action="">
+                        <input type="hidden" name="purchase" value="1">
+                        <input type="hidden" name="quoteId" value="<?php echo $quoteNumber; ?>">
+                        <input type="hidden" name="quotePrice" value="<?php echo $quotePrice; ?>">
+                        <!-- Add hidden fields for all form data -->
+                        <?php foreach ($_POST as $key => $value): ?>
+                            <input type="hidden" name="<?php echo htmlspecialchars($key); ?>" value="<?php echo htmlspecialchars($value); ?>">
+                        <?php endforeach; ?>
+                        <div class="mb-3">
+                            <label for="cardName" class="form-label">Card Name</label>
+                            <input type="text" class="form-control" id="cardName" name="cardName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cardNumber" class="form-label">Card Number</label>
+                            <input type="text" class="form-control" id="cardNumber" name="cardNumber" maxlength="16" required>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="expirationDate" class="form-label">Expiration Date</label>
+                                <input type="text" class="form-control" id="expirationDate" name="expirationDate" placeholder="MM/YY" maxlength="5" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="securityCode" class="form-label">Security Code</label>
+                                <input type="text" class="form-control" id="securityCode" name="securityCode" maxlength="3" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Complete Purchase</button>
+                    </form>
+                </div>
+            </div>
+
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+            <script>
+                // Set minimum date for cover start to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('cover_start').min = today;
+
+                // Purchase form functionality
+                function showPurchaseForm() {
+                    document.getElementById('purchaseModal').style.display = 'block';
+                }
+
+                function closeModal() {
+                    document.getElementById('purchaseModal').style.display = 'none';
+                }
+
+                // Close modal when clicking outside
+                window.onclick = function(event) {
+                    const modal = document.getElementById('purchaseModal');
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+
+                // Format expiration date input
+                document.getElementById('expirationDate').addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.slice(0,2) + '/' + value.slice(2);
+                    }
+                    e.target.value = value;
+                });
+
+                // Only allow numbers in card number and security code fields
+                document.getElementById('cardNumber').addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
+
+                document.getElementById('securityCode').addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/\D/g, '');
+                });
+
+                // Add form validation before submission
+                document.getElementById('purchaseForm').addEventListener('submit', function(e) {
+                    const cardNumber = document.getElementById('cardNumber').value;
+                    const securityCode = document.getElementById('securityCode').value;
+                    const expirationDate = document.getElementById('expirationDate').value;
+
+                    if (cardNumber.length !== 16) {
+                        alert('Please enter a valid 16-digit card number');
+                        e.preventDefault();
+                        return;
+                    }
+
+                    if (securityCode.length !== 3) {
+                        alert('Please enter a valid 3-digit security code');
+                        e.preventDefault();
+                        return;
+                    }
+
+                    if (!expirationDate.match(/^(0[1-9]|1[0-2])\/([0-9]{2})$/)) {
+                        alert('Please enter a valid expiration date (MM/YY)');
+                        e.preventDefault();
+                        return;
+                    }
+                });
+            </script>
+          </body>
+          </html>
+
+
+      
+      
+      
