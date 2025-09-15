@@ -15,6 +15,11 @@ Resources:
         VpcId: !GetAtt VPCStack.Outputs.VpcId
         PublicSubnetId: !GetAtt VPCStack.Outputs.PublicSubnetId
 
+  SSMStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./ssm-stack.yaml
+
 Outputs:
   VpcId:
     Description: "VPC ID from VPC stack"
