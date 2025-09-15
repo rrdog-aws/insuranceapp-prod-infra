@@ -15,10 +15,10 @@ Resources:
         VpcId: !GetAtt VPCStack.Outputs.VpcId
         PublicSubnetId: !GetAtt VPCStack.Outputs.PublicSubnetId
 
-  SSMStack:
+  S3Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: ./ssm-stack.yaml
+      TemplateURL: ./s3-stack.yaml
 
 Outputs:
   VpcId:
