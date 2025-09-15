@@ -21,6 +21,7 @@ Resources:
             Principal:
               Service:
                 - ec2.amazonaws.com
+                - cloudformation.amazonaws.com
             Action:
               - 'sts:AssumeRole'
       ManagedPolicyArns:
@@ -28,8 +29,7 @@ Resources:
       - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
       # CloudWatch agent
       - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
-      # Optional: allow EC2 to communicate with CloudFormation
-      - arn:aws:iam::aws:policy/service-role/AmazonEC2RolePolicyForLaunchWizard
+
    
   EC2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
