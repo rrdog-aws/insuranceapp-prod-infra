@@ -71,6 +71,8 @@ Resources:
         config:
           commands:
             nginx:
+            00_create_nginx_user:
+              command: useradd -r -s /sbin/nologin nginx || true
               command: |
                 yum install -y nginx php php-fpm amazon-ssm-agent amazon-cloudwatch-agent 
             enable_nginx:
