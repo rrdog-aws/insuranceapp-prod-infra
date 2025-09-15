@@ -24,11 +24,12 @@ Resources:
             Action:
               - 'sts:AssumeRole'
       ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforAWSCloudFormation
-        # SSM agent (Session Manager, Run Command, etc.)
+      # SSM agent
       - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-        # CloudWatch agent (logs & metrics)
-      - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicyXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+      # CloudWatch agent
+      - arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy
+      # Optional: allow EC2 to communicate with CloudFormation
+      - arn:aws:iam::aws:policy/service-role/AmazonEC2RolePolicyForLaunchWizard
    
   EC2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
