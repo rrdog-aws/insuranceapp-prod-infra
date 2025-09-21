@@ -102,3 +102,7 @@ Outputs:
   PublicSubnetId:
     Description: "Public Subnet ID for Insurance App Prod"
     Value: !Ref PublicSubnet
+
+  PrivateSubnetId:
+    Description: "Private Subnet ID for Insurance App Prod"
+    Value: !Ref PrivateSubnet
