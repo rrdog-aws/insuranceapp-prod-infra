@@ -7,14 +7,6 @@ Resources:
     Properties:
       TemplateURL: ./vpc-stack.yaml   
 
-  Appstack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: ./app-stack.yaml
-      Parameters:
-        VpcId: !GetAtt VPCStack.Outputs.VpcId
-        PublicSubnetId: !GetAtt VPCStack.Outputs.PublicSubnetId
-
   ECSStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -22,7 +14,7 @@ Resources:
       Parameters:
         VpcId: !GetAtt VPCStack.Outputs.VpcId
         PublicSubnetId1: !GetAtt VPCStack.Outputs.PublicSubnetId1
-        PublicSubnet2:  !GetAtt VPCStack.Outputs.PublicSubnetId2
+        PublicSubnetId2:  !GetAtt VPCStack.Outputs.PublicSubnetId2
         PrivateSubnetId1: !GetAtt VPCStack.Outputs.PrivateSubnetId1
         PrivateSubnetId2: !GetAtt VPCStack.Outputs.PrivateSubnetId2
 
