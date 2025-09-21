@@ -7,26 +7,29 @@ phases:
     commands:
       - echo "Installing/upgrading AWS CLI"
       - pip install --upgrade awscli
+
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      - echo "Validating root stack..."
+      - echo "Validating CloudFormation templates..."
       - aws cloudformation validate-template --template-body file://cloudformation/root-stack.yaml
+
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
-      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest .
       - echo "Packaging CloudFormation templates..."
-      - aws cloudformation package --template-file root-stack.yaml --s3-bucket codepipeline-eu-north-1-322643336408 --output-template-file packaged-root-stack.yaml
+      - cd cloudformation
+      - aws cloudformation package --template-file root-stack.yaml --s3-bucket codepipeline-eu-north-1-322643336408 --output-template-file ../packaged-root-stack.yaml
 
   post_build:
     commands:
       - echo Pushing Docker image...
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - docker push $REPOSITORY_URI:latest
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest
+      - echo Build completed on `date`
 
 artifacts:
   files:
     - packaged-root-stack.yaml
+  discard-paths: no
