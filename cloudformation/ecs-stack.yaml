@@ -78,6 +78,7 @@ Resources:
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
+      Name: php-app-target-group
       HealthCheckIntervalSeconds: 30
       HealthCheckPath: /
       HealthCheckProtocol: HTTP
@@ -181,7 +182,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: !GetAtt LogGroup.Arn
-
+                
   TaskRole: 
     Type: AWS::IAM::Role
     Properties:
