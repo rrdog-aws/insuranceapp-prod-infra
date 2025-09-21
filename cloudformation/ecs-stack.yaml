@@ -5,7 +5,7 @@ Parameters:
   VpcId:
     Type: String
     Description: The VPC id
-  PublicSubnetId1:
+  PublicSubnet1:
     Type: String
     Description: The public subnet id 1
   PublicSubnet2:
@@ -63,8 +63,8 @@ Resources:
         - Key: idle_timeout.timeout_seconds
           Value: '60'
       Subnets: 
-        - !Ref PublicSubnetId1
-        - !Ref PublicSubnetId2
+        - !Ref PublicSubnet1
+        - !Ref PublicSubnet2
       SecurityGroups:
         - !Ref ALBSecurityGroup
 
