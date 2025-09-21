@@ -5,13 +5,19 @@ Parameters:
   VpcId:
     Type: String
     Description: The VPC id
-  PublicSubnet1:
+  PublicSubnet1:    
     Type: String
     Description: The public subnet id 1
-  PublicSubnet2:
+  PublicSubnet2:    
     Type: String
     Description: The public subnet id 2
-  # Add this parameter
+  PrivateSubnet1:   
+    Type: String
+    Description: The private subnet id 1
+  PrivateSubnet2:
+    Type: String
+    Description: The private subnet id 2
+  
   ContainerImage:
     Type: String
     Default: php:8.2-apache
