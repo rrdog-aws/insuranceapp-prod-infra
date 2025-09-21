@@ -153,8 +153,8 @@ Resources:
           SecurityGroups: 
             - !Ref ServiceSecurityGroup
           Subnets: 
-            - !Ref PrivateSubnetId1
-            - !Ref PrivateSubnetId2
+            - !Ref PrivateSubnet1
+            - !Ref PrivateSubnet2
           AssignPublicIp: DISABLED
       LoadBalancers:
         - ContainerName: php-app
