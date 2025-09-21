@@ -15,6 +15,15 @@ Resources:
         VpcId: !GetAtt VPCStack.Outputs.VpcId
         PublicSubnetId: !GetAtt VPCStack.Outputs.PublicSubnetId
 
+  ECSStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: ./ecs-stack.yaml
+      Parameters:
+        VpcId: !GetAtt VPCStack.Outputs.VpcId
+        PublicSubnetId: !GetAtt VPCStack.Outputs.PublicSubnetId
+        PrivateSubnetId: !GetAtt VPCStack.Outputs.PrivateSubnetId
+
   S3Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -30,3 +39,7 @@ Outputs:
   EC2Id:
     Description: "EC2 instance ID from app stack"
     Value: !GetAtt Appstack.Outputs.EC2Id
+  ECSId:
+    Description: "ECS cluster ID from ECS stack"
+    Value: !GetAtt ECSStack.Outputs.ECSId
+
