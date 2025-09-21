@@ -7,19 +7,31 @@ Resources:
     Properties:
       CidrBlock: 10.0.0.0/16
   
-  # Public Subnet
-  PublicSubnet:
+  # Public Subnet1
+  PublicSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.1.0/24
   
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.3.0/24
+  
   # Private Subnet
-  PrivateSubnet:
+  PrivateSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 10.0.2.0/24
+  
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.4.0/24
 
   # Internet Gateway
   InternetGateway:
@@ -99,10 +111,18 @@ Outputs:
     Description: "VPC ID for Insurance App Prod"
     Value: !Ref VPC
 
-  PublicSubnetId:
+  PublicSubnetId1:
     Description: "Public Subnet ID for Insurance App Prod"
-    Value: !Ref PublicSubnet
+    Value: !Ref PublicSubnetId1
 
-  PrivateSubnetId:
+  PublicSubnetId2:
+    Description: "Public Subnet ID for Insurance App Prod"
+    Value: !Ref PublicSubnetId2
+
+  PrivateSubnetId1:
     Description: "Private Subnet ID for Insurance App Prod"
-    Value: !Ref PrivateSubnet
+    Value: !Ref PrivateSubnetId1
+
+  PrivateSubnetId2:
+    Description: "Private Subnet ID for Insurance App Prod"
+    Value: !Ref PrivateSubnet2

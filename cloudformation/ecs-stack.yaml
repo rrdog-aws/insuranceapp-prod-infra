@@ -5,12 +5,12 @@ Parameters:
   VpcId:
     Type: String
     Description: The VPC id
-  PublicSubnetId:
+  PublicSubnetId1:
     Type: String
-    Description: The public subnet id
-  PrivateSubnetId:
+    Description: The public subnet id 1
+  PublicSubnet2:
     Type: String
-    Description: The private subnet id
+    Description: The public subnet id 2
   # Add this parameter
   ContainerImage:
     Type: String
@@ -63,7 +63,8 @@ Resources:
         - Key: idle_timeout.timeout_seconds
           Value: '60'
       Subnets: 
-        - !Ref PublicSubnetId
+        - !Ref PublicSubnetId1
+        - !Ref PublicSubnetId2
       SecurityGroups:
         - !Ref ALBSecurityGroup
 
@@ -146,7 +147,8 @@ Resources:
           SecurityGroups: 
             - !Ref ServiceSecurityGroup
           Subnets: 
-            - !Ref PrivateSubnetId
+            - !Ref PrivateSubnetId1
+            - !Ref PrivateSubnetId2
           AssignPublicIp: DISABLED
       LoadBalancers:
         - ContainerName: php-app

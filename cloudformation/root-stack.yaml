@@ -21,8 +21,10 @@ Resources:
       TemplateURL: ./ecs-stack.yaml
       Parameters:
         VpcId: !GetAtt VPCStack.Outputs.VpcId
-        PublicSubnetId: !GetAtt VPCStack.Outputs.PublicSubnetId
-        PrivateSubnetId: !GetAtt VPCStack.Outputs.PrivateSubnetId
+        PublicSubnetId1: !GetAtt VPCStack.Outputs.PublicSubnetId1
+        PublicSubnet2:  !GetAtt VPCStack.Outputs.PublicSubnetId2
+        PrivateSubnetId1: !GetAtt VPCStack.Outputs.PrivateSubnetId1
+        PrivateSubnetId2: !GetAtt VPCStack.Outputs.PrivateSubnetId2
 
   S3Stack:
     Type: AWS::CloudFormation::Stack
@@ -33,9 +35,18 @@ Outputs:
   VpcId:
     Description: "VPC ID from VPC stack"
     Value: !GetAtt VPCStack.Outputs.VpcId
-  PublicSubnetId:
+  PublicSubnetId1:
     Description: "Public Subnet ID from VPC stack"
-    Value: !GetAtt VPCStack.Outputs.PublicSubnetId
+    Value: !GetAtt VPCStack.Outputs.PublicSubnetId1
+  PublicSubnet2:
+    Description: "Public Subnet ID from VPC stack"
+    Value: !GetAtt VPCStack.Outputs.PublicSubnetId2
+  PrivateSubnetId1:
+    Description: "Private Subnet ID from VPC stack"
+    Value: !GetAtt VPCStack.Outputs.PrivateSubnetId1
+  PrivateSubnetId2:
+    Description: "Private Subnet ID from VPC stack"
+    Value: !GetAtt VPCStack.Outputs.PrivateSubnetId2
   EC2Id:
     Description: "EC2 instance ID from app stack"
     Value: !GetAtt Appstack.Outputs.EC2Id
