@@ -82,12 +82,12 @@ Resources:
       HealthCheckIntervalSeconds: 30
       HealthCheckPath: /
       HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
+      HealthCheckTimeoutSeconds: 10
+      HealthyThresholdCount: 10
       TargetType: ip
       Port: 80
       Protocol: HTTP
-      UnhealthyThresholdCount: 5
+      UnhealthyThresholdCount: 15
       VpcId: !Ref VpcId
 
   # 6. Create ALB Listener
@@ -124,13 +124,7 @@ Resources:
           Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/php-app:latest 
           PortMappings:     
             - ContainerPort: 80
-          HealthCheck:
-            Command:
-              - CMD-SHELL
-              - curl -f http://localhost/ || exit 1
-            Interval: 30
-            Timeout: 5
-            Retries: 3
+              Protocol: tcp
           LogConfiguration: 
             LogDriver: awslogs
             Options:
@@ -146,8 +140,12 @@ Resources:
       ServiceName: php-app
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref TaskDefinition
-      DesiredCount: 2
+      DesiredCount: 1
       LaunchType: FARGATE
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 0  # Allow all tasks to be replaced
+      HealthCheckGracePeriodSeconds: 300
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups: 
@@ -174,7 +172,17 @@ Resources:
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
-
+      Policies:
+        - PolicyName: TaskExecutionPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt LogGroup.Arn
+                
   TaskRole: 
     Type: AWS::IAM::Role
     Properties:
