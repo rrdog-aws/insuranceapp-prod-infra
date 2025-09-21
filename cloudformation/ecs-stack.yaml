@@ -63,7 +63,7 @@ Resources:
   ALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Sub ${AWS::StackName}-alb
+      Name: alb-insurance-app-prod
       Scheme: internet-facing
       LoadBalancerAttributes:
         - Key: idle_timeout.timeout_seconds
@@ -77,7 +77,7 @@ Resources:
   TargetGroup:
       Type: AWS::ElasticLoadBalancingV2::TargetGroup
       Properties:
-        Name: !Sub ${AWS::StackName}-tg    
+        Name: !Sub alb-insurance-app-prod-tg    
         HealthCheckIntervalSeconds: 30      
         HealthCheckPath: /
         HealthCheckProtocol: HTTP
