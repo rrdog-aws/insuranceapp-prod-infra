@@ -39,9 +39,6 @@ Outputs:
   PrivateSubnetId2:
     Description: "Private Subnet ID from VPC stack"
     Value: !GetAtt VPCStack.Outputs.PrivateSubnetId2
-  EC2Id:
-    Description: "EC2 instance ID from app stack"
-    Value: !GetAtt Appstack.Outputs.EC2Id
   ECSId:
     Description: "ECS cluster ID from ECS stack"
     Value: !GetAtt ECSStack.Outputs.ECSId
