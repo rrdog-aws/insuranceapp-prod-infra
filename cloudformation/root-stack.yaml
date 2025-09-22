@@ -22,8 +22,8 @@ Resources:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: ./r53-stack.yaml
-    Parameters:
-      LoadBalancerDNSName: !GetAtt ECSStack.Outputs.LoadBalancerDNS
+      Parameters:
+        LoadBalancerDNSName: !GetAtt ECSStack.Outputs.LoadBalancerDNS
 
 Outputs:
   VpcId:
