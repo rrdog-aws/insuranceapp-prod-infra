@@ -116,7 +116,6 @@ Resources:
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      EnableExecuteCommand: true
       Family: php-app
       RequiresCompatibilities: 
         - FARGATE
