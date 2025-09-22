@@ -116,6 +116,7 @@ Resources:
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
+      EnableExecuteCommand: true
       Family: php-app
       RequiresCompatibilities: 
         - FARGATE
@@ -185,6 +186,10 @@ Resources:
                 Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
+                  - ssmmessages:CreateControlChannel
+                  - ssmmessages:CreateDataChannel
+                  - ssmmessages:OpenControlChannel
+                  - ssmmessages:OpenDataChannel
                 Resource: !GetAtt LogGroup.Arn
                 
   TaskRole: 
