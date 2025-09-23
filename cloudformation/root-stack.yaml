@@ -34,7 +34,5 @@ Outputs:
   PrivateSubnet2:
     Description: "Private Subnet ID from VPC stack"
     Value: !GetAtt VPCStack.Outputs.PrivateSubnet2Id 
-  HostedZoneId:
-    Description: "Hosted Zone ID from R53 stack"
-    Value: !GetAtt R53Stack.Outputs.HostedZoneId
+
 
