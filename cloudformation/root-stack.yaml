@@ -18,14 +18,6 @@ Resources:
         PrivateSubnet1: !GetAtt VPCStack.Outputs.PrivateSubnet1Id
         PrivateSubnet2: !GetAtt VPCStack.Outputs.PrivateSubnet2Id
 
-  R53Stack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: ./r53-stack.yaml
-      Parameters:
-        LoadBalancerDNSName: !GetAtt ECSStack.Outputs.LoadBalancerDNS
-        HostedZoneId: "Z02680662FJD96QWO1L65"
-
 Outputs:
   VpcId:
     Description: "VPC ID from VPC stack"
