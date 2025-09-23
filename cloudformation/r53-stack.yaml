@@ -9,7 +9,7 @@ Parameters:
   LoadBalancerHostedZoneId:
     Type: String
     Description: The Hosted Zone ID of the Application Load Balancer
-    Default: Z32O12XQLNTSW2  
+    Default: Z23TAZ6LKFMNIO  
   LoadBalancerDNSName:
     Type: String
     Description: The DNS Name of the Application Load Balancer
