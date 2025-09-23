@@ -24,6 +24,7 @@ Resources:
       TemplateURL: ./r53-stack.yaml
       Parameters:
         LoadBalancerDNSName: !GetAtt ECSStack.Outputs.LoadBalancerDNS
+        HostedZoneId: "Z02680662FJD96QWO1L65"
 
 Outputs:
   VpcId:
