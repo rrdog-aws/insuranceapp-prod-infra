@@ -7,13 +7,9 @@ phases:
     commands:
       - echo "Installing/upgrading AWS CLI"
       - pip install --upgrade awscli
-      - yum install -y curl
 
   pre_build:
     commands:
-      - TIMESTAMP=$(date +%Y%m%d%H%M%S)
-      - IMAGE_TAG=${TIMESTAMP}-${CODEBUILD_RESOLVED_SOURCE_VERSION:0:7}
-      - echo "Setting image tag: $IMAGE_TAG"
       - echo "Checking repository contents..."
       - ls -la
       - echo "Checking app directory contents..."
@@ -28,31 +24,22 @@ phases:
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:${IMAGE_TAG} .
-      - docker tag $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:${IMAGE_TAG} $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest .
       # Test the container locally
-      - echo "Starting test container..."
       - docker run -d --name test-container $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest
-      - sleep 10
+      - sleep 5
       - echo "Testing container configuration:"
-      - docker ps
-      - docker logs test-container
-      - docker stop test-container
-      - docker rm test-container
       - echo "Packaging CloudFormation templates..."
       - cd cloudformation
       - aws cloudformation package --template-file root-stack.yaml --s3-bucket codepipeline-eu-north-1-322643336408 --output-template-file ../packaged-root-stack.yaml
 
   post_build:
     commands:
-      - echo Pushing Docker images...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:${IMAGE_TAG}
+      - echo Pushing Docker image...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest
-      - printf '{"ImageURI":"%s"}' $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:${IMAGE_TAG} > imageDefinitions.json
       - echo Build completed on `date`
 
 artifacts:
   files:
     - packaged-root-stack.yaml
-    - imageDefinitions.json
   discard-paths: no
