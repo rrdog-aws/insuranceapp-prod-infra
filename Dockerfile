@@ -12,7 +12,11 @@ RUN mkdir -p /var/www/html/app
 COPY app/ /var/www/html/app/
 
 # Set index.php as DirectoryIndex
+RUN sed -i 's|DocumentRoot "/var/www/html"|DocumentRoot "/var/www/html/app"|g' /etc/httpd/conf/httpd.conf
 RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf
+RUN cat /etc/httpd/conf/httpd.conf
+RUN ls /var/www/html/app/
+RUN systemctl restart httpd
 
 # Configure Apache
 RUN echo "ServerName *********" >> /etc/httpd/conf/httpd.conf && \
