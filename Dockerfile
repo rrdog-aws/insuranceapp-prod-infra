@@ -4,13 +4,19 @@ FROM amazonlinux:2
 RUN yum update -y && \
     yum install -y httpd php php-mysqlnd php-gd php-xml php-mbstring && \
     yum clean all
-    
-# Create a test index.html
-RUN echo "<html><body><h1>It works!</h1></body></html>" > /var/www/html/index.html
+
+# Create app directory
+RUN mkdir -p /var/www/html/app
+
+# Copy the application files
+COPY app/ /var/www/html/app/
+
+# Set index.php as DirectoryIndex
+RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf
 
 # Configure Apache
-RUN echo "ServerName localhost" >> /etc/httpd/conf/httpd.conf && \
-    echo "Listen 0.0.0.0:80" >> /etc/httpd/conf/httpd.conf
+RUN echo "ServerName *********" >> /etc/httpd/conf/httpd.conf && \
+    echo "Listen *******:80" >> /etc/httpd/conf/httpd.conf
 
 # Set permissions
 RUN chown -R apache:apache /var/www/html && \
