@@ -16,7 +16,6 @@ RUN sed -i 's|DocumentRoot "/var/www/html"|DocumentRoot "/var/www/html/app"|g' /
 RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf
 RUN cat /etc/httpd/conf/httpd.conf
 RUN ls /var/www/html/app/
-RUN systemctl restart httpd
 
 # Configure Apache
 RUN echo "ServerName *********" >> /etc/httpd/conf/httpd.conf && \
