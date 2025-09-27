@@ -11,11 +11,16 @@ RUN mkdir -p /var/www/html/app
 # Copy the application files
 COPY app/ /var/www/html/app/
 
-# Set index.php as DirectoryIndex
-RUN sed -i 's|DocumentRoot "/var/www/html"|DocumentRoot "/var/www/html/app"|g' /etc/httpd/conf/httpd.conf
-RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf
-RUN cat /etc/httpd/conf/httpd.conf
-RUN ls /var/www/html/app/
+# Verify files are copied (this will show in build logs)
+RUN ls -la /var/www/html/app/
+
+# Set index.php as DirectoryIndex and configure Apache
+RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf && \
+    echo "<Directory /var/www/html/app>" >> /etc/httpd/conf/httpd.conf && \
+    echo "    Options Indexes FollowSymLinks" >> /etc/httpd/conf/httpd.conf && \
+    echo "    AllowOverride All" >> /etc/httpd/conf/httpd.conf && \
+    echo "    Require all granted" >> /etc/httpd/conf/httpd.conf && \
+    echo "</Directory>" >> /etc/httpd/conf/httpd.conf
 
 # Configure Apache
 RUN echo "ServerName *********" >> /etc/httpd/conf/httpd.conf && \
@@ -27,5 +32,5 @@ RUN chown -R apache:apache /var/www/html && \
 
 EXPOSE 80
 
-# Start Apache in foreground
-CMD ["/usr/sbin/httpd", "-D", "FOREGROUND"]
+# Start Apache with verbose logging
+CMD ["/usr/sbin/httpd", "-D", "FOREGROUND", "-e", "debug"]
