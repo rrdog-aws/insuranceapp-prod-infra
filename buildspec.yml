@@ -26,10 +26,6 @@ phases:
       # Test the container locally
       - docker run -d --name test-container $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest
       - sleep 5
-      - docker exec test-container ls -la /var/www/html/app/
-      - docker exec test-container cat /etc/httpd/conf/httpd.conf
-      - docker stop test-container
-      - docker rm test-container
       - echo "Packaging CloudFormation templates..."
       - cd cloudformation
       - aws cloudformation package --template-file root-stack.yaml --s3-bucket codepipeline-eu-north-1-322643336408 --output-template-file ../packaged-root-stack.yaml
