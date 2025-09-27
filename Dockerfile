@@ -11,11 +11,9 @@ RUN rm -f /var/www/html/index.html
 # Copy the application files
 COPY app/index.php /var/www/html/index.php
 
-# Configure Apache to use index.php as default
-RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf
-
 # Configure Apache
-RUN echo "ServerName localhost" >> /etc/httpd/conf/httpd.conf && \
+RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf && \
+    echo "ServerName localhost" >> /etc/httpd/conf/httpd.conf && \
     echo "Listen 80" >> /etc/httpd/conf/httpd.conf
 
 # Set permissions
