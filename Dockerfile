@@ -7,20 +7,14 @@ RUN yum update -y && \
     yum install -y httpd php php-mysqlnd php-gd php-xml php-mbstring && \
     yum clean all
 
-
-# Create app directory
-RUN mkdir -p /var/www/html/app
-
-# Copy the application files
-COPY app/ /var/www/html/app/index.php
-
-# Verify files are copied (this will show in build logs)
-RUN ls -la /var/www/html/
-
-# Set index.php as DirectoryIndex and configure Apache
-RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf
+# Copy the application file directly to web root
 COPY app/index.php /var/www/html/index.php
 
+# Verify files are copied
+RUN ls -la /var/www/html/
+
+# Configure Apache
+RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf
 
 # Set permissions
 RUN chown -R apache:apache /var/www/html && \

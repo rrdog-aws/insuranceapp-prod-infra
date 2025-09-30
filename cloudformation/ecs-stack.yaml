@@ -189,7 +189,9 @@ Resources:
                   - ssmmessages:CreateDataChannel
                   - ssmmessages:OpenControlChannel
                   - ssmmessages:OpenDataChannel
-                Resource: !GetAtt LogGroup.Arn
+                  - ssmmessages:CreateControlChannel
+                  - ssmmessages:CreateDataChannel
+                Resource: "*"
                 
   TaskRole: 
     Type: AWS::IAM::Role
