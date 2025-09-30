@@ -1,30 +1,26 @@
 FROM amazonlinux:2
 
 # Install Apache and PHP
+RUN amazon-linux-extras enable php7.4
+RUN yum clean metadata
 RUN yum update -y && \
     yum install -y httpd php php-mysqlnd php-gd php-xml php-mbstring && \
     yum clean all
+
 
 # Create app directory
 RUN mkdir -p /var/www/html/app
 
 # Copy the application files
-COPY app/ /var/www/html/app/
+COPY app/ /var/www/html/app/index.php
 
 # Verify files are copied (this will show in build logs)
-RUN ls -la /var/www/html/app/
+RUN ls -la /var/www/html/
 
 # Set index.php as DirectoryIndex and configure Apache
-RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf && \
-    echo "<Directory /var/www/html/app>" >> /etc/httpd/conf/httpd.conf && \
-    echo "    Options Indexes FollowSymLinks" >> /etc/httpd/conf/httpd.conf && \
-    echo "    AllowOverride All" >> /etc/httpd/conf/httpd.conf && \
-    echo "    Require all granted" >> /etc/httpd/conf/httpd.conf && \
-    echo "</Directory>" >> /etc/httpd/conf/httpd.conf
+RUN echo "DirectoryIndex index.php index.html" >> /etc/httpd/conf/httpd.conf
+COPY app/index.php /var/www/html/index.php
 
-# Configure Apache
-RUN echo "ServerName *********" >> /etc/httpd/conf/httpd.conf && \
-    echo "Listen *******:80" >> /etc/httpd/conf/httpd.conf
 
 # Set permissions
 RUN chown -R apache:apache /var/www/html && \
