@@ -20,24 +20,32 @@ phases:
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - echo "Validating CloudFormation templates..."
       - aws cloudformation validate-template --template-body file://cloudformation/root-stack.yaml
+      - TIMESTAMP=$(date +%Y%m%d%H%M%S)
 
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest .
+      - docker build --no-cache -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest .
+      - docker tag $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:$TIMESTAMP
       # Test the container locally
       - docker run -d --name test-container $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest
       - sleep 5
-      - echo "Testing container configuration:"
+      - echo "Verifying container content:"
+      - docker exec test-container ls -la /var/www/html/
+      - docker exec test-container cat /var/www/html/index.php
+      - docker stop test-container
+      - docker rm test-container
       - echo "Packaging CloudFormation templates..."
       - cd cloudformation
       - aws cloudformation package --template-file root-stack.yaml --s3-bucket codepipeline-eu-north-1-322643336408 --output-template-file ../packaged-root-stack.yaml
 
   post_build:
     commands:
-      - echo Pushing Docker image...
+      - echo Pushing Docker images...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:$TIMESTAMP
       - echo Build completed on `date`
+      - echo "Image pushed with tags: latest and $TIMESTAMP"
 
 artifacts:
   files:
