@@ -45,7 +45,6 @@ phases:
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:latest
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/php-app:$TIMESTAMP
       - echo Build completed on `date`
-      - echo "Image pushed with tags: latest and $TIMESTAMP"
 
 artifacts:
   files:
